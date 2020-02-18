@@ -2,8 +2,8 @@
 <package>
   <name>seq_planner</name> 
   <version>0.0.1</version>
-  <description> andor Package  </description> 
-  <maintainer email="kourosh.darvish@gmail.com">Kourosh Darvish </maintainer>
+  <description> seq_planner Package  </description> 
+ <maintainer email="kourosh.darvish@gmail.com">Kourosh Darvish </maintainer>
   <license>BSD</license>
   <url type="repository">
   https://github.com/kouroshD

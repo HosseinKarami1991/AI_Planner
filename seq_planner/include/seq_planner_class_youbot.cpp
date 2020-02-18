@@ -63,12 +63,11 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	nodeSolved=false;
 	haSolved=false;
 
-	subHumanActionAck=nh.subscribe("HRecAction",100, &seq_planner_class::CallBackHumanAck, this);
-	subRobotActionAck=nh.subscribe("robot_ack",100, &seq_planner_class::CallBackRobotAck, this);
-	subSimulationAck=nh.subscribe("simulation_response",100, &seq_planner_class::UpdateSimulation, this);
+	subRobotActionAck=nh.subscribe("youbot_ack",100, &seq_planner_class::CallBackRobotAck, this);
+	subSimulationAck=nh.subscribe("simulation_response_youbot",100, &seq_planner_class::UpdateSimulation, this);
 
-	pubRobotCommand = nh.advertise<std_msgs::String>("robot_command",10);
-	pubSimulationCommand=nh.advertise<robot_interface_msgs::SimulationRequestMsg>("simulation_command",10);
+	pubRobotCommand = nh.advertise<std_msgs::String>("youbot_command",10);
+	pubSimulationCommand=nh.advertise<robot_interface_msgs::SimulationRequestMsg>("simulation_command_youbot",10);
 
 	knowledgeBase_client=nh.serviceClient<knowledge_msgs::knowledgeSRV>("knowledgeService");
 	pubToRobotDisplay=nh.advertise<std_msgs::String>("robotDisplayText",10);
@@ -783,33 +782,23 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 
 	// add the current joint values to the simulation: in order to do it I should call the knowledge base:
 	knowledge_msgs::knowledgeSRV knowledge_msg_q;
-	knowledge_msg_q.request.reqType="LeftArm_q";
+	knowledge_msg_q.request.reqType="youbot_q";
 	knowledge_msg_q.request.requestInfo="Pose";
 	if (knowledgeBase_client.call(knowledge_msg_q))
 	{
 //		cout<<"801"<<knowledge_msg_q.response.pose.size()<<endl;
-			for(int j=0;j<7;j++)
+			for(int j=0;j<5;j++)
 				temp_sim.simulation_q[0][j]=knowledge_msg_q.response.pose[j]; // here I have the joint values
 	}
-	knowledge_msg_q.request.reqType="RightArm_q";
-	knowledge_msg_q.request.requestInfo="Pose";
-	if (knowledgeBase_client.call(knowledge_msg_q))
-	{
-//		cout<<"802"<<knowledge_msg_q.response.pose.size()<<endl;
-		for(int j=0;j<7;j++)
-			temp_sim.simulation_q[1][j]=knowledge_msg_q.response.pose[j]; // here I have the joint values
-	}
+	
 
 
 	cout<<"initial q (left Arm): ";
-	for(int i=0;i<7;i++)
+	for(int i=0;i<5;i++)
 		cout<<temp_sim.simulation_q[0][i]<<" ";
 	cout<<endl;
 
-	cout<<"initial q (right Arm): ";
-	for(int i=0;i<7;i++)
-		cout<<temp_sim.simulation_q[1][i]<<" ";
-	cout<<endl;
+
 
 //	cout<<"803"<<endl;
 
@@ -1250,7 +1239,7 @@ void seq_planner_class::GiveSimulationCommand(void){
 	for(int i=0; i<2;i++)
 	{
 		robot_interface_msgs::Joints joint_values;
-		for(int j=0;j<7;j++)
+		for(int j=0;j<5;j++)
 		{
 			joint_values.values.push_back(simulation_vector[simulationVectorNumber].simulation_q[i][j]);
 		}
@@ -1329,62 +1318,49 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	for(int i=0;i<simulationResponse.ArmsJoint[0].values.size();i++)
 		cout<<simulationResponse.ArmsJoint[0].values[i]<<" ";
 	cout<<endl;
-	cout<<"q Right: ";
-	for(int i=0;i<simulationResponse.ArmsJoint[1].values.size();i++)
-		cout<<simulationResponse.ArmsJoint[1].values[i]<<" ";
-	cout<<endl;
+
 
 	cout<<"*******************"<<endl;
 	vector<bool> qChangeByAction={false, false};
-	vector<double> q_old(7,0.0),q_new(7,0.0);
+	vector<double> q_old(5,0.0),q_new(5,0.0);
 	bool failure_Flag=false;
 	for(int i=0;i< simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents.size();i++)
 	{
 		for(int j=0; j< simulationResponse.ResponsibleAgents.size();j++)
 		{
-//			cout<<"301-0: "<<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents[i]<<", "<<(string)simulationResponse.ResponsibleAgents[j]<<endl;
+			cout<<"301-0: "<<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents[i]<<", "<<(string)simulationResponse.ResponsibleAgents[j]<<endl;
 			if(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents[i]== (string)simulationResponse.ResponsibleAgents[j])
 			{
-//				cout<<"301-1"<<endl;
+				cout<<"301-1"<<endl;
 				if((bool)simulationResponse.success==true)
 				{
-//					cout<<"301-2"<<endl;
+					cout<<"301-2"<<endl;
 
 					simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone[i]=true;
 					// fill the simulation timing:
 					if((double)simulationResponse.time>simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber])
 						simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber]=simulationResponse.time;
 
-					for(int k=0;k<7;k++)
+					for(int k=0;k<5;k++)
 					{
 						q_old[i]=simulation_vector[simulationVectorNumber].simulation_q[0][k];
 						q_new[i]=simulationResponse.ArmsJoint[0].values[k];
 					}
 					qChangeByAction[0]=ActionChangesRobot_q(q_old,q_new);
-
-					for(int k=0;k<7;k++)
-					{
-						q_old[i]=simulation_vector[simulationVectorNumber].simulation_q[1][k];
-						q_new[i]=simulationResponse.ArmsJoint[1].values[k];
-					}
-					qChangeByAction[1]=ActionChangesRobot_q(q_old,q_new);
+                      cout<<"301-3"<<endl;
+					
 
 					// Fill the simulation joint values:
 					if((string)simulationResponse.ResponsibleAgents[j]=="LeftArm")
-					{
+					{cout<<"301-4"<<endl;
 //						cout<<"301-3"<<endl;
-						for(int k=0;k<7;k++)
+						for(int k=0;k<5;k++)
 							simulation_vector[simulationVectorNumber].simulation_q[0][k]=simulationResponse.ArmsJoint[0].values[k];
-					}
-					else if((string)simulationResponse.ResponsibleAgents[j]=="RightArm")
-					{
-//						cout<<"301-4"<<endl;
-						for(int k=0;k<7;k++)
-							simulation_vector[simulationVectorNumber].simulation_q[1][k]=simulationResponse.ArmsJoint[1].values[k];
-					}
+					}  
+					
 					else{}
 					failure_Flag=false;
-
+                            cout<<"301-5"<<endl;
 				}
 				else
 				{
@@ -2116,40 +2092,7 @@ void seq_planner_class::UpdateRobotEmergencyFlag(string ActionName, vector<strin
 };
 
 
-void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
-	cout<<BOLD(FBLU("seq_planner_class::CallBackHumanAck"))<<endl;
 
-	string actionName=msg-> data.c_str();
-	if(actionName=="PutDown"){
-	cout<<agents[0].name<<" action: "<< actionName<<endl;
-	if(agents[0].isBusy==false)
-	{
-		// it means that, beforehand no action is assigned to human action
-		timeNow=ros::Time::now().toSec();
-		fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
-		fileLog<< to_string(timeNow)<<" HumanActionEmergency started"<<"\n";
-
-		EmergencyRobotStop();
-	}
-	timeNow=ros::Time::now().toSec();
-	fileLog<< to_string(timeNow)<<" HumanAction ended"<<"\n";
-	fileLog<< to_string(timeNow)<<" planning started"<<"\n";
-
-
-	agents[0].isBusy=false;
-	agents[0].lastActionAck=actionName;
-	agents[0].isSuccessfullyDone=true;
-	vector<string> agentsName;
-	agentsName.push_back("Human");
-	bool success=true;
-	//	string ActionName, vector<string>AgentsName, bool success
-
-	if(CanAgentPerformAction(agentsName,"",actionName,false))
-		UpdateStateActionTable(actionName,agentsName,success);
-	else
-		cout<<"Error In receiving msg from Human ack, the agents can not perform given action"<<endl;
-      }
-}
 
 void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	cout<<BOLD(FBLU("seq_planner_class::CallBackRobotAck"))<<endl;
@@ -2383,3 +2326,4 @@ bool seq_planner_class::ActionChangesRobot_q(vector<double> &q_old, vector<doubl
 		return false;
 
 };
+

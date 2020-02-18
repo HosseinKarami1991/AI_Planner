@@ -40,7 +40,7 @@ catkin_package(  CATKIN_DEPENDS baxter_core_msgs message_generation roscpp rospy
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
-
+ADD_LIBRARY(seq_planner_class_youbot include/seq_planner_class_youbot.cpp)
 ADD_LIBRARY(seq_planner_class include/seq_planner_class.cpp)
 ADD_LIBRARY(basic_classes include/basic_classes.cpp)
 #add_library(andor_aonode include/andor_aonode.cpp)
@@ -61,6 +61,20 @@ add_dependencies(seq_planner_class baxter_core_msgs_generate_messages_cpp geomet
 target_link_libraries(seq_planner
    ${catkin_LIBRARIES}
 seq_planner_class
+basic_classes
+#andor_aograph
+ )
+
+add_executable(seq_planner_youbot src/seq_planner_youbot.cpp )
+
+add_dependencies(seq_planner_youbot baxter_core_msgs_generate_messages_cpp geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp robot_interface_msgs_generate_messages_cpp)
+
+add_dependencies(seq_planner_class_youbot baxter_core_msgs_generate_messages_cpp geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp robot_interface_msgs_generate_messages_cpp)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(seq_planner_youbot
+   ${catkin_LIBRARIES}
+seq_planner_class_youbot
 basic_classes
 #andor_aograph
  )

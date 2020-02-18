@@ -1,0 +1,16 @@
+obj1inipos
+obj1finpos
+checked
+faulty
+not
+na
+done
+h0 Approach_posapproach?RightArm UnGrasp?RightArm Approach_posgrasp?RightArm Grasp?RightArm Approach_poscamera?RightArm HoldOn?RightArm Screw?RightArm
+h1 readifna?RightArm
+h2 readiffaulty?RightArm
+h3 readifnonfaulty?RightArm
+h4 Approach_posinter?RightArm Approach_poshumanhand?RightArm UnGrasp?RightArm Approach_posrest?RightArm
+h5 Approach_posinter?RightArm Approach_posboxa?RightArm UnGrasp?RightArm Approach_posrest?RightArm
+h6 Approach_posrendezvousright?RightArm Approach_posrendezvous?LeftArm HoldOn?LeftArm Approach_posrendezvousgrasp?LeftArm Grasp?LeftArm UnGrasp?RightArm Approach_posrightrelease?RightArm Approach_posinterleft?LeftArm Approach_posboxleft?LeftArm UnGrasp?LeftArm Approach_posrestleft?LeftArm Approach_posrest?RightArm
+h7 Approach_posrestleft?LeftArm
+posrightrelease

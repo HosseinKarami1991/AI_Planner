@@ -42,16 +42,16 @@ int main(int argc, char **argv)
 {
 
 	// ROS parameters definitions:
-	ros::init(argc, argv, "seq_planner");
+	ros::init(argc, argv, "seq_planner_youbot");
 	ros::NodeHandle nh;
 
 	ros::Rate loop_rate(80);
 
 	// planner class initialization:
-	string AssemblyName="simpletaskdual";
+	string AssemblyName="simpletask";
 	const char* home=getenv("HOME");
 	string assemblyPath(home);
-	assemblyPath=assemblyPath+"/catkin_ws/src/AI_Planner/seq_planner/files/simpletaskdual";
+	assemblyPath=assemblyPath+"/catkin_ws/src/AI_Planner/seq_planner/files/youbot";
 
 	seq_planner_class plan_obj(assemblyPath, AssemblyName);
 	vector<vector<string>> gen_Feasible_state_list;
@@ -172,4 +172,5 @@ int main(int argc, char **argv)
 	return 1;
 
 }   
+
 
